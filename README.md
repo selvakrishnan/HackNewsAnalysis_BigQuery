@@ -5,4 +5,4 @@
 3. Considering the average score of all stories, the position of the current username in this ranking
 4. The username directly in front of him in this ranking
 
-# Attaching the Analysis as PDF in the Repo
+# Attaching the Analysis as a PDF in the Repo
