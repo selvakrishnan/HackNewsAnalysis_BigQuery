@@ -1,0 +1,46 @@
+WITH
+  STORY_COUNT AS (
+  SELECT
+    HNF.BY AS username,
+    HNF.type,
+    CAST(SUM(HNF.score)/COUNT(HNF.score) AS INT64)AS average_score,
+    COUNT(*) AS count_of_story
+  FROM
+    `bigquery-public-data.hacker_news.full_201510` HNF
+  WHERE
+    HNF.type="story"
+  GROUP BY
+    HNF.type,
+    HNF.BY,
+    HNF.score
+  HAVING
+    COUNT(*)>1),
+  COMMENT AS (
+  SELECT
+    HNF.BY AS username,
+    HNF.type,
+    COUNT(*) AS count_of_comment
+  FROM
+    `bigquery-public-data.hacker_news.full_201510` HNF
+  WHERE
+    HNF.type="comment"
+  GROUP BY
+    HNF.type,
+    HNF.BY
+  HAVING
+    COUNT(*)>1)
+SELECT
+  STORY_COUNT.username,
+  STORY_COUNT.average_score as average_score,
+  RANK() OVER (PARTITION BY STORY_COUNT.username ORDER BY STORY_COUNT.average_score ASC) AS RANK,
+  STORY_COUNT.count_of_story AS count_of_username_published_a_story,
+  COMMENT.count_of_comment AS count_of_comment_greater_than_ten
+FROM
+  STORY_COUNT
+INNER JOIN
+  COMMENT
+ON
+  STORY_COUNT.username = COMMENT.username
+WHERE
+  COMMENT.count_of_comment>10
+
